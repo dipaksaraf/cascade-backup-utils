@@ -1,6 +1,45 @@
 # Cascade Conversation Backup Utility
 
+[![Test Package](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/test.yml/badge.svg)](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/test.yml)
+[![Publish to PyPI](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/publish.yml/badge.svg)](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/publish.yml)
+[![PyPI version](https://badge.fury.io/py/cascade-backup-utils.svg)](https://badge.fury.io/py/cascade-backup-utils)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code Coverage](https://codecov.io/gh/dipaksaraf/cascade-backup-utils/branch/main/graph/badge.svg)](https://codecov.io/gh/dipaksaraf/cascade-backup-utils)
+[![GitHub Actions Build Status](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/build.yml/badge.svg)](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/build.yml)
+[![GitHub Actions Lint Status](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/lint.yml/badge.svg)](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/lint.yml)
+
 This utility helps you back up and consolidate your Cascade conversations from the Windsurf IDE as markdown files. It may also work with other AI coding platforms, though this has not been tested. Backing up conversations from AI coding sessions is crucial, especially as AI models can sometimes produce unexpected results. In particular, when using Windsurf, large conversations can lead to issues such as the IDE failing to start with the message "windsurf failed to start."
+
+## Quick Start
+
+### Installation
+
+You can install the package directly from PyPI:
+
+```bash
+pip install cascade-backup-utils
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/dipaksaraf/cascade-backup-utils.git
+cd cascade-backup-utils
+pip install -e .
+```
+
+### Basic Usage
+
+After installation, you can use the command-line tools:
+
+```bash
+# To backup a conversation:
+cascade-backup
+
+# To consolidate all backups:
+cascade-consolidate
+```
 
 ## Why This Utility?
 
@@ -9,7 +48,7 @@ When the Windsurf IDE encounters issues with large conversations, the common sol
 1. Continuously press `Ctrl + Shift + P` (Command Palette) and select "Developer: Reload Window."
 2. Delete the Cascade cache folder:
    - **Windows**: `C:\Users\<YOUR_USERNAME>\.codeium\windsurf\cascade`
-   - **Linux/Mac**: `~/.codeium/windsurf/cascade`
+   - **Linux/Mac**: `~/.codeium/windsurf\cascade`
 
 However, deleting the cache folder will remove your conversation history. This utility ensures your valuable conversations are preserved and accessible even if you need to clear the cache.
 
@@ -29,12 +68,24 @@ However, deleting the cache folder will remove your conversation history. This u
 - Cleans up UI messages and system text
 - Preserves conversation context and readability
 
-## Setup
+## Development Setup
 
-1. Make sure you have Python installed on your system
-2. Install the required packages:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/dipaksaraf/cascade-backup-utils.git
+   cd cascade-backup-utils
+   ```
+
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use: venv\Scripts\activate
+   ```
+
+3. Install development dependencies:
    ```bash
    pip install -r requirements.txt
+   pip install -r requirements-dev.txt
    ```
 
 ## Usage
@@ -42,9 +93,9 @@ However, deleting the cache folder will remove your conversation history. This u
 ### Backing Up Conversations
 
 1. Open your Cascade conversation
-2. Run the backup script:
+2. Run the backup command:
    ```bash
-   python backup_conversation.py
+   cascade-backup
    ```
 3. Follow the on-screen instructions:
    - Clear any existing text selection
@@ -60,9 +111,9 @@ The script will:
 
 ### Consolidating Backups
 
-1. Run the consolidate script:
+1. Run the consolidate command:
    ```bash
-   python consolidate_backups.py
+   cascade-consolidate
    ```
 
 The script will:
@@ -71,6 +122,29 @@ The script will:
 - Sort conversations chronologically (newest first)
 - Clean up UI messages and system text
 - Save everything to `consolidated_conversation.md`
+
+## Advanced Usage
+
+### Custom Backup Directory
+By default, backups are stored in your home directory under `.cascade_backups`. You can specify a custom directory:
+
+```bash
+cascade-backup --dir /path/to/backup/directory
+```
+
+### Consolidation Options
+The consolidate command supports several options:
+
+```bash
+# Consolidate with custom output file
+cascade-consolidate --output combined_conversations.md
+
+# Keep original timestamps
+cascade-consolidate --preserve-timestamps
+
+# Sort by oldest first
+cascade-consolidate --sort ascending
+```
 
 ## Backup Location
 
@@ -94,17 +168,60 @@ The consolidation process automatically removes common UI elements and system me
 
 ## Troubleshooting
 
-If you encounter issues:
-1. Make sure all required packages are installed
-2. Ensure Cascade window is active when copying
-3. Try the retry option if clipboard content is not captured
-4. Check console output for error messages
-5. Move mouse to corner to abort if needed
+### Common Issues
 
-## Safety Features
+1. **Mouse Movement Issues**
+   - Ensure no other applications are controlling the mouse
+   - Try increasing the delay: `cascade-backup --delay 2`
 
-- Fail-safe enabled (move mouse to corner to abort)
-- Multiple retry attempts for clipboard operations
-- Error handling for common issues
-- UTF-8 encoding support
-- Backup verification before saving
+2. **Clipboard Problems**
+   - Clear your clipboard before starting
+   - Check if other applications are monitoring the clipboard
+
+3. **File Permission Errors**
+   - Ensure you have write permissions in the backup directory
+   - Try running with elevated privileges if necessary
+
+### Error Messages
+
+- `Failed to capture clipboard`: Clear your clipboard and try again
+- `Timeout waiting for selection`: Increase the timeout with `--timeout 60`
+- `Invalid backup file format`: Ensure the backup files haven't been modified manually
+
+## Security Considerations
+
+1. **Clipboard Security**
+   - The utility temporarily stores conversation data in your system clipboard
+   - Clear sensitive information from your clipboard after use
+
+2. **File Permissions**
+   - Backup files are created with user-only read/write permissions
+   - Consider encrypting sensitive backups
+
+3. **Data Privacy**
+   - Review conversations before backup to exclude sensitive information
+   - Be cautious when sharing consolidated backup files
+
+## Best Practices
+
+1. **Regular Backups**
+   - Back up important conversations immediately
+   - Consider scheduling regular backups
+
+2. **Backup Organization**
+   - Use descriptive filenames
+   - Maintain separate directories for different projects
+   - Document the context of important conversations
+
+3. **Maintenance**
+   - Regularly consolidate backups to save space
+   - Archive old backups
+   - Test backup files periodically
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

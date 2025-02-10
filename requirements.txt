@@ -1,2 +1,2 @@
-pyautogui
-pyperclip
+pyautogui>=0.9.54
+pyperclip>=1.8.2
