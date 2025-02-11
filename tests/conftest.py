@@ -1,10 +1,10 @@
 """Common test fixtures for cascade-backup-utils."""
 import os
-import time
 import pytest
 import pyperclip
 import pyautogui
 from pathlib import Path
+from unittest.mock import MagicMock
 
 
 @pytest.fixture(autouse=True)
@@ -49,7 +49,7 @@ def mock_gui(monkeypatch):
     monkeypatch.setattr(pyautogui, "screenshot", mock_screenshot)
     monkeypatch.setattr(pyautogui, "click", mock_click)
     monkeypatch.setattr(pyautogui, "hotkey", mock_hotkey)
-    monkeypatch.setattr(time, "sleep", mock_sleep)
+    monkeypatch.setattr(time, "sleep", MagicMock())
 
 
 @pytest.fixture
