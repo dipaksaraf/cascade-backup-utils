@@ -38,9 +38,17 @@ def mock_gui(monkeypatch):
         from PIL import Image
         return Image.new('RGB', (1, 1))
 
+    def mock_click(*args, **kwargs):
+        pass
+
+    def mock_hotkey(*args, **kwargs):
+        pass
+
     monkeypatch.setattr(pyautogui, "moveTo", mock_move_to)
     monkeypatch.setattr(pyautogui, "position", mock_position)
     monkeypatch.setattr(pyautogui, "screenshot", mock_screenshot)
+    monkeypatch.setattr(pyautogui, "click", mock_click)
+    monkeypatch.setattr(pyautogui, "hotkey", mock_hotkey)
     monkeypatch.setattr(time, "sleep", mock_sleep)
 
 

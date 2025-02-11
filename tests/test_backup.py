@@ -1,12 +1,12 @@
 """Tests for the backup module."""
 import os
-import time
 import pytest
 import pyperclip
 import pyautogui
-from datetime import datetime
-from cascade_backup_utils.backup import CascadeBackup
 from pathlib import Path
+from cascade_backup_utils.backup import CascadeBackup
+from datetime import datetime
+import time
 
 
 # Mock pyautogui functions to avoid actual mouse movement
@@ -42,9 +42,6 @@ def test_backup_creation(backup_dir, monkeypatch):
     # Mock input to skip user prompt
     monkeypatch.setattr("builtins.input", lambda _: "")
 
-    # Mock time.sleep to speed up tests
-    monkeypatch.setattr(time, "sleep", lambda _: None)
-
     # Run backup
     backup.backup()
 
@@ -70,9 +67,6 @@ def test_backup_empty_clipboard(backup_dir, monkeypatch):
     # Mock input
     monkeypatch.setattr("builtins.input", lambda _: "")
 
-    # Mock time.sleep to speed up tests
-    monkeypatch.setattr(time, "sleep", lambda _: None)
-
     # Run backup
     backup.backup()
 
@@ -94,9 +88,6 @@ def test_backup_failsafe(backup_dir, monkeypatch):
 
     # Mock input
     monkeypatch.setattr("builtins.input", lambda _: "")
-
-    # Mock time.sleep to speed up tests
-    monkeypatch.setattr(time, "sleep", lambda _: None)
 
     # Run backup
     backup.backup()
@@ -123,9 +114,6 @@ def test_backup_save_error(backup_dir, monkeypatch):
 
     monkeypatch.setattr(backup, "_save_backup", mock_save_backup)
 
-    # Mock time.sleep to speed up tests
-    monkeypatch.setattr(time, "sleep", lambda _: None)
-
     # Run backup
     backup.backup()
 
@@ -150,9 +138,6 @@ def test_backup_retry_success(backup_dir, monkeypatch):
 
     # Mock input
     monkeypatch.setattr("builtins.input", lambda _: "")
-
-    # Mock time.sleep to speed up tests
-    monkeypatch.setattr(time, "sleep", lambda _: None)
 
     # Run backup
     backup.backup()
