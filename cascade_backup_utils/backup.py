@@ -102,9 +102,7 @@ class CascadeBackup:
 
         # Format timestamp for content header
         header = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        content_with_ts = (
-            f"*Backup created on: {header}*\n\n{content}"
-        )
+        content_with_ts = f"*Backup created on: {header}*\n\n{content}"
 
         try:
             with open(filepath, "w", encoding="utf-8") as file:

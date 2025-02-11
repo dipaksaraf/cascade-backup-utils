@@ -89,11 +89,7 @@ class BackupConsolidator:
         files = os.listdir(backup_dir)
 
         md_files = [f for f in files if f.endswith(".md")]
-        return [
-            os.path.join(backup_dir, f)
-            for f in md_files
-            if f != consolidated_name
-        ]
+        return [os.path.join(backup_dir, f) for f in md_files if f != consolidated_name]
 
     def _extract_timestamp(self, filename):
         """Extract timestamp from backup filename."""
