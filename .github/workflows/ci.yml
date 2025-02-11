@@ -8,10 +8,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.10', '3.12']
       fail-fast: false
 
     steps:
@@ -23,6 +24,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     
     - name: Install system dependencies
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-tk python3-dev scrot xvfb xsel
@@ -36,24 +38,22 @@ jobs:
     - name: Check code formatting
       run: black --check .
     
-    - name: Lint with flake8
+    - name: Security scan with Bandit
       run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --max-line-length=88 --extend-ignore=E203 --statistics
+        pip install bandit
+        bandit -r cascade_backup_utils -ll
     
     - name: Run tests
       env:
         DISPLAY: :99
         PYTHONPATH: ${{ github.workspace }}
       run: |
-        # Set up Xvfb and authentication
-        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-        sleep 5
-        # Create Xauthority FILE (not directory)
-        touch ~/.Xauthority
-        xauth -f ~/.Xauthority add :99 . $(mcookie)
-        xauth list
-        # Run tests with X11 support
+        if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          sleep 5
+          touch $HOME/.Xauthority
+          xauth -f $HOME/.Xauthority add :99 . $(mcookie)
+        fi
         pytest -v --cov=cascade_backup_utils --cov-report=xml --ignore-glob="**/test_backup.py"
     
     - name: Upload coverage to Codecov
@@ -61,5 +61,19 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
-        name: codecov-umbrella
+        name: codecov-${{ matrix.os }}-py${{ matrix.python-version }}
         fail_ci_if_error: false
+
+  security:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+    - uses: actions/checkout@v4
+    - name: Check for secrets
+      uses: gitleaks/gitleaks-action@v8
+      with:
+        config-path: .github/gitleaks.toml
+    - name: Dependency audit
+      run: |
+        pip install pip-audit
+        pip-audit

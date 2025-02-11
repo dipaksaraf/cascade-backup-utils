@@ -1,0 +1,5 @@
+title = "Gitleaks config for Cascade Backup Utils"
+
+[[rules]]
+description = "Generic Secret Pattern"
+regex = '''(?i)(secret|key|password|token|credential)[=:]\s*["']?[a-z0-9]{20,}["']?'''
