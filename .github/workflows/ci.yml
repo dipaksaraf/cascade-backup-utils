@@ -46,8 +46,14 @@ jobs:
         DISPLAY: :99
         PYTHONPATH: ${{ github.workspace }}
       run: |
+        # Set up Xvfb and authentication
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-        sleep 3
+        sleep 5
+        mkdir -p ~/.Xauthority
+        touch ~/.Xauthority
+        xauth add :99 . $(mcookie)
+        xauth list
+        # Run tests with X11 support
         pytest -v --cov=cascade_backup_utils --cov-report=xml --ignore-glob="**/test_backup.py"
     
     - name: Upload coverage to Codecov
