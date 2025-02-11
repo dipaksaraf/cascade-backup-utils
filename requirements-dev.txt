@@ -2,3 +2,5 @@ pytest==7.3.1
 pytest-cov==4.1.0
 black==22.3.0
 flake8==6.1.0
+pycodestyle==2.11.1
+pyflakes==3.1.0
