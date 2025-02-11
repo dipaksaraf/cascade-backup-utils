@@ -45,9 +45,16 @@ def test_main_consolidate(tmp_path, monkeypatch):
 
     # Create some test backup files
     test_files = [
-        ("backup1.md", "*Backup created on: 2024-01-01 10:00:00*\nTest content 1"),
-        ("backup2.md", "*Backup created on: 2024-01-01 11:00:00*\nTest content 2"),
+        (
+            "backup_2024-01-01_10-00-00.md",
+            "*Backup created on: 2024-01-01 10:00:00*\nTest content 1",
+        ),
+        (
+            "backup_2024-01-01_11-00-00.md",
+            "*Backup created on: 2024-01-01 11:00:00*\nTest content 2",
+        ),
     ]
+
     for filename, content in test_files:
         (backup_dir / filename).write_text(content)
 
@@ -80,6 +87,10 @@ def test_main_consolidate(tmp_path, monkeypatch):
     consolidated_file = backup_dir / "consolidated_conversation.md"
     assert consolidated_file.exists()
     consolidated_content = consolidated_file.read_text()
+
+    # Check content
+    assert "*Backup created on: 2024-01-01 10:00:00*" in consolidated_content
+    assert "*Backup created on: 2024-01-01 11:00:00*" in consolidated_content
     assert "Test content 1" in consolidated_content
     assert "Test content 2" in consolidated_content
 

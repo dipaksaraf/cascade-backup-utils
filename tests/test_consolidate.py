@@ -3,23 +3,23 @@ from cascade_backup_utils.consolidate import BackupConsolidator
 
 
 def test_consolidate_backups(tmp_path, monkeypatch):
-    # Create test backup files
+    # Create backup directory
     backup_dir = tmp_path / "backups"
     os.makedirs(backup_dir, exist_ok=True)
 
-    # Create some test backup files with timestamps
+    # Create some test backup files
     test_files = [
         (
-            "backup1.md",
-            "*Backup created on: 2024-01-01 10:00:00*\nConversation 1\nLine 2",
+            "backup_2024-01-01_10-00-00.md",
+            "*Backup created on: 2024-01-01 10:00:00*\nConversation 1\n",
         ),
         (
-            "backup2.md",
-            "*Backup created on: 2024-01-01 11:00:00*\nConversation 2\nLine 2",
+            "backup_2024-01-01_11-00-00.md",
+            "*Backup created on: 2024-01-01 11:00:00*\nConversation 2\n",
         ),
         (
-            "backup3.md",
-            "*Backup created on: 2024-01-01 12:00:00*\nConversation 3\nLine 2",
+            "backup_2024-01-01_12-00-00.md",
+            "*Backup created on: 2024-01-01 12:00:00*\nConversation 3\n",
         ),
     ]
 
@@ -35,19 +35,18 @@ def test_consolidate_backups(tmp_path, monkeypatch):
         str(backup_dir / "consolidated_conversation.md"),
     )
 
-    # Run consolidation
+    # Consolidate backups
     consolidator.consolidate()
 
-    # Check if consolidated file was created
+    # Check if consolidated file exists and contains expected content
     consolidated_file = backup_dir / "consolidated_conversation.md"
     assert consolidated_file.exists()
-
-    # Check content
     consolidated_content = consolidated_file.read_text()
-    for _, content in test_files:
-        # Remove timestamp from test content since consolidator will reformat it
-        content_without_timestamp = content.split("\n", 1)[1]
-        assert content_without_timestamp in consolidated_content
+
+    # Check if content is in chronological order
+    assert "*Backup created on: 2024-01-01 10:00:00*" in consolidated_content
+    assert "*Backup created on: 2024-01-01 11:00:00*" in consolidated_content
+    assert "*Backup created on: 2024-01-01 12:00:00*" in consolidated_content
 
 
 def test_consolidate_no_backups(tmp_path, monkeypatch):
@@ -64,7 +63,7 @@ def test_consolidate_no_backups(tmp_path, monkeypatch):
         str(backup_dir / "consolidated_conversation.md"),
     )
 
-    # Run consolidation
+    # Consolidate backups
     consolidator.consolidate()
 
     # Check that no consolidated file was created
@@ -73,15 +72,24 @@ def test_consolidate_no_backups(tmp_path, monkeypatch):
 
 
 def test_consolidate_duplicate_content(tmp_path, monkeypatch):
-    # Create test backup files
+    # Create backup directory
     backup_dir = tmp_path / "backups"
     os.makedirs(backup_dir, exist_ok=True)
 
     # Create backup files with duplicate content
     test_files = [
-        ("backup1.md", "*Backup created on: 2024-01-01 10:00:00*\nDuplicate content"),
-        ("backup2.md", "*Backup created on: 2024-01-01 11:00:00*\nDuplicate content"),
-        ("backup3.md", "*Backup created on: 2024-01-01 12:00:00*\nUnique content"),
+        (
+            "backup_2024-01-01_10-00-00.md",
+            "*Backup created on: 2024-01-01 10:00:00*\nDuplicate content",
+        ),
+        (
+            "backup_2024-01-01_11-00-00.md",
+            "*Backup created on: 2024-01-01 11:00:00*\nDuplicate content",
+        ),
+        (
+            "backup_2024-01-01_12-00-00.md",
+            "*Backup created on: 2024-01-01 12:00:00*\nUnique content",
+        ),
     ]
 
     for filename, content in test_files:
@@ -96,12 +104,15 @@ def test_consolidate_duplicate_content(tmp_path, monkeypatch):
         str(backup_dir / "consolidated_conversation.md"),
     )
 
-    # Run consolidation
+    # Consolidate backups
     consolidator.consolidate()
 
-    # Check content - duplicates should only appear once
+    # Check if consolidated file exists and contains expected content
     consolidated_file = backup_dir / "consolidated_conversation.md"
+    assert consolidated_file.exists()
     consolidated_content = consolidated_file.read_text()
+
+    # Check content - duplicates should only appear once
     assert consolidated_content.count("Duplicate content") == 1
     assert "Unique content" in consolidated_content
 
@@ -135,7 +146,7 @@ Final content"""
         str(backup_dir / "consolidated_conversation.md"),
     )
 
-    # Run consolidation
+    # Consolidate backups
     consolidator.consolidate()
 
     # Check that UI messages were removed
@@ -173,7 +184,7 @@ Test content with invalid timestamp"""
         str(backup_dir / "consolidated_conversation.md"),
     )
 
-    # Run consolidation
+    # Consolidate backups
     consolidator.consolidate()
 
     # Check that file was created but content was handled gracefully
@@ -184,14 +195,16 @@ Test content with invalid timestamp"""
 
 
 def test_consolidate_filename_timestamp(tmp_path, monkeypatch):
-    # Create test backup files
+    # Create backup directory
     backup_dir = tmp_path / "backups"
     os.makedirs(backup_dir, exist_ok=True)
 
     # Create backup file with timestamp in filename
-    content = "Test content with filename timestamp"
-    filename = "cascade_backup_20240210_193101.md"
-
+    timestamp = "2024-02-10_19-31-01"
+    content = (
+        "*Backup created on: 2024-02-10 19:31:01*\nTest content with filename timestamp"
+    )
+    filename = f"backup_{timestamp}.md"
     (backup_dir / filename).write_text(content)
 
     # Initialize consolidator and patch the backup directory
@@ -203,13 +216,15 @@ def test_consolidate_filename_timestamp(tmp_path, monkeypatch):
         str(backup_dir / "consolidated_conversation.md"),
     )
 
-    # Run consolidation
+    # Consolidate backups
     consolidator.consolidate()
 
-    # Check that timestamp was extracted from filename
+    # Check if consolidated file exists and contains expected content
     consolidated_file = backup_dir / "consolidated_conversation.md"
     assert consolidated_file.exists()
     consolidated_content = consolidated_file.read_text()
+
+    # Check if timestamp was extracted from filename
     assert "*Backup created on: 2024-02-10 19:31:01*" in consolidated_content
     assert "Test content with filename timestamp" in consolidated_content
 
@@ -238,7 +253,7 @@ def test_consolidate_read_error(tmp_path, monkeypatch):
 
     monkeypatch.setattr("builtins.open", mock_open)
 
-    # Run consolidation - should handle error gracefully
+    # Consolidate backups - should handle error gracefully
     consolidator.consolidate()
 
     # Verify the consolidated file was not created

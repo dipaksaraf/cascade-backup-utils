@@ -54,21 +54,19 @@ class BackupConsolidator:
         Returns:
             Cleaned content string.
         """
-        ui_messages = [
-            "DoneFeedback has been submitted",
-            "Start with History Ctrl+Enter",
-            "Press Enter again to interrupt and send a new message",
-            "Image",
-            "Claude 3.5 Sonnet",
-            "Write",
-            "Chat",
-        ]
+        # First extract the timestamp if present
+        timestamp_line = ""
+        match = re.search(r"(\*Backup created on: .*?\*)", content)
+        if match:
+            timestamp_line = match.group(1) + "\n"
+            content = content.replace(timestamp_line, "", 1)
 
+        # Remove UI messages
         lines = content.split("\n")
         cleaned = []
 
         for line in lines:
-            if any(msg in line for msg in ui_messages):
+            if any(msg in line for msg in self.ui_messages):
                 continue
             if not line.strip():
                 continue
@@ -76,7 +74,13 @@ class BackupConsolidator:
 
         result = "\n".join(cleaned)
         result = re.sub(r"\n{3,}", "\n\n", result)
-        return result.strip()
+        result = result.strip()
+
+        # Add back the timestamp line if it was present
+        if timestamp_line:
+            result = timestamp_line + result
+
+        return result
 
     def _get_backup_files(self):
         """Get list of backup files in the backup directory."""
@@ -92,7 +96,24 @@ class BackupConsolidator:
         return [os.path.join(backup_dir, f) for f in md_files if f != consolidated_name]
 
     def _extract_timestamp(self, filename):
-        """Extract timestamp from backup filename."""
+        """Extract timestamp from backup filename or content.
+
+        Args:
+            filename: Path to the backup file.
+
+        Returns:
+            datetime object if valid timestamp found, None otherwise.
+        """
+        # Try backup_YYYY-MM-DD_HH-MM-SS format
+        match = re.search(r"backup_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})", filename)
+        if match:
+            timestamp_str = match.group(1)
+            try:
+                return datetime.strptime(timestamp_str, "%Y-%m-%d_%H-%M-%S")
+            except ValueError:
+                pass
+
+        # Try backup_YYYYMMDD_HHMMSS format
         match = re.search(r"backup_(\d{8}_\d{6})", filename)
         if match:
             timestamp_str = match.group(1)
@@ -100,6 +121,24 @@ class BackupConsolidator:
                 return datetime.strptime(timestamp_str, "%Y%m%d_%H%M%S")
             except ValueError:
                 pass
+
+        # Try to find timestamp in content
+        try:
+            with open(filename, "r", encoding="utf-8") as f:
+                content = f.read()
+                match = re.search(
+                    r"\*Backup created on: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\*",
+                    content,
+                )
+                if match:
+                    timestamp_str = match.group(1)
+                    try:
+                        return datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+                    except ValueError:
+                        pass
+        except Exception:
+            pass
+
         return None
 
     def _sort_files_by_timestamp(self, files):
@@ -120,7 +159,20 @@ class BackupConsolidator:
             print("No backup files found to consolidate.")
             return
 
-        sorted_files = self._sort_files_by_timestamp(backup_files)
+        # Sort files by timestamp and filter out those with invalid timestamps
+        valid_files = []
+        for file_path in backup_files:
+            timestamp = self._extract_timestamp(file_path)
+            if timestamp:
+                valid_files.append((file_path, timestamp))
+
+        if valid_files:
+            # Sort by timestamp
+            valid_files.sort(key=lambda x: x[1])
+            sorted_files = [f[0] for f in valid_files]
+        else:
+            # If no valid timestamps found, use files in their original order
+            sorted_files = backup_files
 
         consolidated_content = []
         seen_content = set()
@@ -130,13 +182,28 @@ class BackupConsolidator:
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read().strip()
 
-                cleaned = self.clean_content(content)
-
-                if cleaned in seen_content:
+                # Skip files with invalid timestamps
+                timestamp = self._extract_timestamp(file_path)
+                if not timestamp:
                     continue
 
-                consolidated_content.append(cleaned)
-                seen_content.add(cleaned)
+                # Clean the content (excluding timestamp)
+                match = re.search(
+                    r"(\*Backup created on: .*?\*)(.*)", content, re.DOTALL
+                )
+                if match:
+                    timestamp_line = match.group(1)
+                    content_without_timestamp = match.group(2)
+                    cleaned_content = self.clean_content(content_without_timestamp)
+
+                    # Skip if we've seen this content before
+                    if cleaned_content in seen_content:
+                        continue
+
+                    # Add back the timestamp
+                    cleaned = f"{timestamp_line}\n{cleaned_content}"
+                    consolidated_content.append(cleaned)
+                    seen_content.add(cleaned_content)
 
             except Exception as e:
                 print(f"Error processing {file_path}: {str(e)}")
@@ -149,7 +216,13 @@ class BackupConsolidator:
             except Exception as e:
                 print(f"Error saving consolidated file: {str(e)}")
         else:
-            print("No valid content found to consolidate.")
+            # Create an empty file even if no valid content found
+            try:
+                with open(self.consolidated_file, "w", encoding="utf-8") as f:
+                    f.write("")
+                print("No valid content found to consolidate.")
+            except Exception as e:
+                print(f"Error creating empty consolidated file: {str(e)}")
 
 
 if __name__ == "__main__":
