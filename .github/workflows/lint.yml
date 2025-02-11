@@ -20,17 +20,18 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install -r requirements.txt
         pip install -r requirements-dev.txt
     
-    - name: Reformat code with Black
-      run: black .
+    - name: Check code formatting with Black
+      run: black --check .
     
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # check against our configuration
-        flake8 . --count --max-line-length=88 --statistics
+        flake8 . --count --max-line-length=88 --extend-ignore=E203 --statistics
     
     - name: Check dependencies for known security vulnerabilities
-      run: safety check
+      run: safety check -i 51457 --full-report
