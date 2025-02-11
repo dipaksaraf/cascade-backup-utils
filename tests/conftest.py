@@ -4,6 +4,7 @@ import time
 import pytest
 import pyperclip
 import pyautogui
+from pathlib import Path
 
 
 @pytest.fixture(autouse=True)
@@ -33,8 +34,13 @@ def mock_gui(monkeypatch):
     def mock_sleep(*args):
         pass
 
+    def mock_screenshot(*args, **kwargs):
+        from PIL import Image
+        return Image.new('RGB', (1, 1))
+
     monkeypatch.setattr(pyautogui, "moveTo", mock_move_to)
     monkeypatch.setattr(pyautogui, "position", mock_position)
+    monkeypatch.setattr(pyautogui, "screenshot", mock_screenshot)
     monkeypatch.setattr(time, "sleep", mock_sleep)
 
 

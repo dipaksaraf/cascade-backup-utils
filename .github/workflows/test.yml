@@ -26,11 +26,13 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-tk python3-dev scrot xvfb
+        sudo apt-get install -y python3-tk python3-dev scrot xvfb xsel
         
     - name: Install macOS system dependencies
       if: runner.os == 'macOS'
-      run: brew install python-tk
+      run: |
+        brew install python-tk
+        brew install xsel
     
     - name: Install Python dependencies
       run: |
@@ -40,11 +42,18 @@ jobs:
     
     - name: Run tests on Linux
       if: runner.os == 'Linux'
+      env:
+        DISPLAY: :99
+        PYTHONPATH: ${{ github.workspace }}
       run: |
-        xvfb-run --server-args="-screen 0 1024x768x24" python -m pytest tests/ --cov=cascade_backup_utils --cov-report=xml
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        sleep 3
+        python -m pytest tests/ --cov=cascade_backup_utils --cov-report=xml
     
     - name: Run tests on other platforms
       if: runner.os != 'Linux'
+      env:
+        PYTHONPATH: ${{ github.workspace }}
       run: |
         python -m pytest tests/ --cov=cascade_backup_utils --cov-report=xml
     
