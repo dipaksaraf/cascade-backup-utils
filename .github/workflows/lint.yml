@@ -29,8 +29,8 @@ jobs:
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+        # check against our configuration
+        flake8 . --count --max-line-length=88 --statistics
     
     - name: Check dependencies for known security vulnerabilities
       run: safety check
