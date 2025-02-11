@@ -45,7 +45,7 @@ target-version = ["py38"]
 include = '\.pyi?$'
 
 [tool.pytest.ini_options]
-addopts = "--cov=cascade_backup_utils --cov-report=xml -v"
+addopts = "-v --cov=cascade_backup_utils --cov-report=xml"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 filterwarnings = [

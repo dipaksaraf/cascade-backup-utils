@@ -48,7 +48,7 @@ jobs:
       run: |
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         sleep 3
-        pytest tests/ --cov=cascade_backup_utils --cov-report=xml -v
+        pytest -v --cov=cascade_backup_utils --cov-report=xml
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

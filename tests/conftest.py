@@ -4,7 +4,7 @@ import time
 import pytest
 import pyperclip
 import pyautogui
-from pathlib import Path
+# from pathlib import Path
 from unittest.mock import MagicMock
 
 
