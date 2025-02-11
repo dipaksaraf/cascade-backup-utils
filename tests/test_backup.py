@@ -1,8 +1,22 @@
 import os
 import time
+import pytest
 import pyperclip
 import pyautogui
+from datetime import datetime
 from cascade_backup_utils.backup import CascadeBackup
+
+# Mock pyautogui functions to avoid actual mouse movement
+@pytest.fixture(autouse=True)
+def mock_pyautogui(monkeypatch):
+    def mock_moveTo(*args, **kwargs):
+        pass
+    
+    def mock_position():
+        return (0, 0)
+    
+    monkeypatch.setattr(pyautogui, "moveTo", mock_moveTo)
+    monkeypatch.setattr(pyautogui, "position", mock_position)
 
 
 def test_backup_creation(tmp_path, monkeypatch):
