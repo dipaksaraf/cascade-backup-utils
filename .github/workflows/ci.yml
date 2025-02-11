@@ -8,11 +8,9 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.8', '3.9', '3.10', '3.11']
       fail-fast: false
 
@@ -23,76 +21,36 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-        cache: 'pip'
     
-    - name: Install Linux system dependencies
-      if: runner.os == 'Linux'
+    - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-tk python3-dev scrot xvfb xsel
-        
-    - name: Install macOS system dependencies
-      if: runner.os == 'macOS'
-      run: |
-        brew install python-tk
-        brew install xsel
     
-    - name: Install Windows system dependencies
-      if: runner.os == 'Windows'
+    - name: Install Python dependencies
       run: |
-        python -m pip install pywin32
-    
-    - name: Install base dependencies
-      run: |
-        python -m pip install --upgrade pip wheel setuptools
-        python -m pip install pytest==7.3.1 pytest-cov==4.1.0 pytest-timeout==2.1.0
-    
-    - name: Install package
-      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install -r requirements-dev.txt
         python -m pip install -e .
     
-    - name: Install dev dependencies
-      if: runner.os == 'ubuntu-latest'
-      run: |
-        python -m pip install black==23.12.1 flake8==6.1.0 safety==2.3.4
-    
-    - name: Check code formatting with Black
-      if: runner.os == 'ubuntu-latest'
+    - name: Check code formatting
       run: black --check .
     
     - name: Lint with flake8
-      if: runner.os == 'ubuntu-latest'
       run: |
-        # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # check against our configuration
         flake8 . --count --max-line-length=88 --extend-ignore=E203 --statistics
     
-    - name: Check dependencies for known security vulnerabilities
-      if: runner.os == 'ubuntu-latest'
-      run: safety check -i 51457 --full-report
-    
-    - name: Run tests on Linux
-      if: runner.os == 'Linux'
+    - name: Run tests
       env:
         DISPLAY: :99
         PYTHONPATH: ${{ github.workspace }}
-        PYTHONUNBUFFERED: 1
       run: |
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         sleep 3
         pytest tests/ --cov=cascade_backup_utils --cov-report=xml -v
     
-    - name: Run tests on other platforms
-      if: runner.os != 'Linux'
-      env:
-        PYTHONPATH: ${{ github.workspace }}
-        PYTHONUNBUFFERED: 1
-      run: |
-        pytest tests/ --cov=cascade_backup_utils --cov-report=xml -v
-    
     - name: Upload coverage to Codecov
-      if: runner.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cascade-backup-utils"
 version = "0.1.0"
-description = "A utility to backup and consolidate Cascade AI conversations from the Windsurf IDE"
+description = "A utility to backup and consolidate Cascade AI conversations"
 readme = "README.md"
 authors = [{ name = "Dipak Saraf", email = "hello@dipaksaraf.com" }]
 license = { file = "LICENSE" }
@@ -21,9 +21,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "pyautogui==0.9.54",
-    "pyperclip==1.8.2",
-    "Pillow==10.0.0",
+    "pyautogui>=0.9.54",
+    "pyperclip>=1.8.2",
+    "Pillow>=10.0.0",
 ]
 requires-python = ">=3.8"
 
@@ -41,7 +41,7 @@ exclude = ["tests*"]
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311"]
+target-version = ["py38"]
 include = '\.pyi?$'
 
 [tool.pytest.ini_options]
