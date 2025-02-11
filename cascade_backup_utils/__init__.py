@@ -1,7 +1,8 @@
-"""Cascade Backup Utils - A utility to backup and consolidate Cascade AI conversations.
+"""Cascade Backup Utils - A package for managing Cascade conversation backups.
 
-This package provides tools to backup and manage Cascade AI conversations from the Windsurf IDE.
-It helps prevent data loss when the IDE needs to be restarted or the cache needs to be cleared.
+This package provides utilities for creating and managing backups of Cascade
+conversations. It includes functionality for backup creation and consolidation
+of multiple backups.
 
 Main Features:
     - Backup conversations to markdown files
