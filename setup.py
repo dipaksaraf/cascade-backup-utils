@@ -1,11 +1,11 @@
 """Setup script for cascade-backup-utils."""
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name="cascade-backup-utils",
     version="0.1.0",
-    packages=find_packages(),
+    packages=["."],
     install_requires=[
         "pyautogui>=0.9.54",
         "pyperclip>=1.8.2",

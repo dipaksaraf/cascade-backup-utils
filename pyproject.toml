@@ -36,12 +36,13 @@ Repository = "https://github.com/dipaksaraf/cascade-backup-utils.git"
 cascade-backup = "cascade_backup_utils.__main__:backup_main"
 cascade-consolidate = "cascade_backup_utils.__main__:consolidate_main"
 
-[tool.setuptools]
-packages = ["cascade_backup_utils"]
+[tool.setuptools.packages.find]
+include = ["cascade_backup_utils*"]
+exclude = ["tests*"]
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311", "py312"]
+target-version = ["py38", "py39", "py310", "py311"]
 include = '\.pyi?$'
 
 [tool.pytest.ini_options]

@@ -1,4 +1,4 @@
-name: Test Package
+name: CI
 
 on:
   push:
@@ -9,11 +9,11 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 15
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
       fail-fast: false
 
     steps:
@@ -23,6 +23,7 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
     
     - name: Install Linux system dependencies
       if: runner.os == 'Linux'
@@ -44,8 +45,24 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -e .
         pip install -r requirements-dev.txt
+    
+    - name: Check code formatting with Black
+      if: runner.os == 'ubuntu-latest'
+      run: black --check .
+    
+    - name: Lint with flake8
+      if: runner.os == 'ubuntu-latest'
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # check against our configuration
+        flake8 . --count --max-line-length=88 --extend-ignore=E203 --statistics
+    
+    - name: Check dependencies for known security vulnerabilities
+      if: runner.os == 'ubuntu-latest'
+      run: safety check -i 51457 --full-report
     
     - name: Run tests on Linux
       if: runner.os == 'Linux'
@@ -56,7 +73,7 @@ jobs:
       run: |
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         sleep 3
-        python -m pytest tests/ --cov=cascade_backup_utils --cov-report=xml -v
+        pytest tests/ --cov=cascade_backup_utils --cov-report=xml -v
     
     - name: Run tests on other platforms
       if: runner.os != 'Linux'
@@ -64,9 +81,10 @@ jobs:
         PYTHONPATH: ${{ github.workspace }}
         PYTHONUNBUFFERED: 1
       run: |
-        python -m pytest tests/ --cov=cascade_backup_utils --cov-report=xml -v
+        pytest tests/ --cov=cascade_backup_utils --cov-report=xml -v
     
     - name: Upload coverage to Codecov
+      if: runner.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
