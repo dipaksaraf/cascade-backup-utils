@@ -1,5 +1,5 @@
 pytest>=7.0.0
-pytest-cov>=4.0.0
+pytest-cov>=4.1.0
 black>=22.0.0
 flake8>=4.0.0
 safety>=2.3.0
