@@ -1,5 +1,6 @@
 """Common test fixtures for cascade-backup-utils."""
 import os
+import time
 import pytest
 import pyperclip
 import pyautogui
@@ -25,6 +26,7 @@ def mock_clipboard(monkeypatch):
 @pytest.fixture(autouse=True)
 def mock_gui(monkeypatch):
     """Mock GUI operations for all tests."""
+
     def mock_move_to(*args, **kwargs):
         pass
 
@@ -36,7 +38,8 @@ def mock_gui(monkeypatch):
 
     def mock_screenshot(*args, **kwargs):
         from PIL import Image
-        return Image.new('RGB', (1, 1))
+
+        return Image.new("RGB", (1, 1))
 
     def mock_click(*args, **kwargs):
         pass

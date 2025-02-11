@@ -15,10 +15,10 @@ import time
 def mock_pyautogui(monkeypatch):
     def mock_moveTo(*args, **kwargs):
         pass
-    
+
     def mock_position():
         return (0, 0)
-    
+
     monkeypatch.setattr(pyautogui, "moveTo", mock_moveTo)
     monkeypatch.setattr(pyautogui, "position", mock_position)
 
@@ -33,7 +33,7 @@ def backup_dir(tmp_path):
 
 @pytest.mark.skipif(
     sys.platform == "win32" and sys.version_info >= (3, 12),
-    reason="pyautogui has issues with Python 3.12 on Windows"
+    reason="pyautogui has issues with Python 3.12 on Windows",
 )
 def test_backup_creation(backup_dir, monkeypatch):
     """Test successful backup creation."""
@@ -63,7 +63,7 @@ def test_backup_creation(backup_dir, monkeypatch):
 
 @pytest.mark.skipif(
     sys.platform == "win32" and sys.version_info >= (3, 12),
-    reason="pyautogui has issues with Python 3.12 on Windows"
+    reason="pyautogui has issues with Python 3.12 on Windows",
 )
 def test_backup_empty_clipboard(backup_dir, monkeypatch):
     """Test handling of empty clipboard."""
@@ -86,7 +86,7 @@ def test_backup_empty_clipboard(backup_dir, monkeypatch):
 
 @pytest.mark.skipif(
     sys.platform == "win32" and sys.version_info >= (3, 12),
-    reason="pyautogui has issues with Python 3.12 on Windows"
+    reason="pyautogui has issues with Python 3.12 on Windows",
 )
 def test_backup_failsafe(backup_dir, monkeypatch):
     """Test handling of FailSafeException."""
@@ -98,8 +98,6 @@ def test_backup_failsafe(backup_dir, monkeypatch):
         raise pyautogui.FailSafeException("Test failsafe")
 
     monkeypatch.setattr(pyperclip, "copy", mock_copy_failsafe)
-
-    # Mock input
     monkeypatch.setattr("builtins.input", lambda _: "")
 
     # Run backup
@@ -112,24 +110,22 @@ def test_backup_failsafe(backup_dir, monkeypatch):
 
 @pytest.mark.skipif(
     sys.platform == "win32" and sys.version_info >= (3, 12),
-    reason="pyautogui has issues with Python 3.12 on Windows"
+    reason="pyautogui has issues with Python 3.12 on Windows",
 )
 def test_backup_save_error(backup_dir, monkeypatch):
     """Test handling of save errors."""
     backup = CascadeBackup()
     monkeypatch.setattr(backup, "backup_dir", str(backup_dir))
 
-    # Set test content
-    pyperclip.copy("Test content")
+    # Set clipboard content
+    pyperclip.copy("Test conversation")
 
-    # Mock input
+    # Mock open to raise an error
+    def mock_open(*args, **kwargs):
+        raise IOError("Test save error")
+
+    monkeypatch.setattr("builtins.open", mock_open)
     monkeypatch.setattr("builtins.input", lambda _: "")
-
-    # Mock save_backup to simulate error
-    def mock_save_backup(_):
-        return False
-
-    monkeypatch.setattr(backup, "_save_backup", mock_save_backup)
 
     # Run backup
     backup.backup()
@@ -141,29 +137,32 @@ def test_backup_save_error(backup_dir, monkeypatch):
 
 @pytest.mark.skipif(
     sys.platform == "win32" and sys.version_info >= (3, 12),
-    reason="pyautogui has issues with Python 3.12 on Windows"
+    reason="pyautogui has issues with Python 3.12 on Windows",
 )
 def test_backup_retry_success(backup_dir, monkeypatch):
     """Test successful backup after retry."""
     backup = CascadeBackup()
     monkeypatch.setattr(backup, "backup_dir", str(backup_dir))
 
-    # Mock clipboard to succeed on second attempt
-    attempts = [0]
+    # Set up mock for clipboard content
+    clipboard_content = ["", "", "Test conversation"]
+    current_attempt = [0]
 
     def mock_paste():
-        attempts[0] += 1
-        return "Test content" if attempts[0] > 1 else ""
+        content = clipboard_content[current_attempt[0]]
+        current_attempt[0] += 1
+        return content
 
     monkeypatch.setattr(pyperclip, "paste", mock_paste)
-
-    # Mock input
-    monkeypatch.setattr("builtins.input", lambda _: "")
+    monkeypatch.setattr("builtins.input", lambda _: "y")
 
     # Run backup
     backup.backup()
 
-    # Check that backup was created
+    # Check if backup was created
     backup_files = list(backup_dir.glob("*.md"))
     assert len(backup_files) == 1
-    assert "Test content" in backup_files[0].read_text()
+
+    # Check content
+    backup_content = backup_files[0].read_text()
+    assert "Test conversation" in backup_content
