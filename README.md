@@ -1,13 +1,10 @@
 # Cascade Conversation Backup Utility
 
-[![Test Package](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/test.yml/badge.svg)](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/test.yml)
-[![Publish to PyPI](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/publish.yml/badge.svg)](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/publish.yml)
+[![CI Status](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/ci.yml/badge.svg)](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/ci.yml)
 [![PyPI version](https://badge.fury.io/py/cascade-backup-utils.svg)](https://badge.fury.io/py/cascade-backup-utils)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Coverage](https://codecov.io/gh/dipaksaraf/cascade-backup-utils/branch/main/graph/badge.svg)](https://codecov.io/gh/dipaksaraf/cascade-backup-utils)
-[![GitHub Actions Build Status](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/build.yml/badge.svg)](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/build.yml)
-[![GitHub Actions Lint Status](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/lint.yml/badge.svg)](https://github.com/dipaksaraf/cascade-backup-utils/actions/workflows/lint.yml)
 
 This utility helps you back up and consolidate your Cascade conversations from the Windsurf IDE as markdown files. It may also work with other AI coding platforms, though this has not been tested. Backing up conversations from AI coding sessions is crucial, especially as AI models can sometimes produce unexpected results. In particular, when using Windsurf, large conversations can lead to issues such as the IDE failing to start with the message "windsurf failed to start."
 
