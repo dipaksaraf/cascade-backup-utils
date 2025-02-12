@@ -58,7 +58,8 @@ jobs:
           xauth -f $HOME/.Xauthority add :99 . $(mcookie)
         fi
         pytest -v --cov=cascade_backup_utils --cov-report=xml --ignore-glob="**/test_backup.py"
-    
+      shell: bash {0}  # Force bash shell for this step
+        
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
