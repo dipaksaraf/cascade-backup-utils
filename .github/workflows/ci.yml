@@ -74,7 +74,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Check for secrets
-      uses: zricethezav/gitleaks-action@v8
+      uses: zricethezav/gitleaks-action@v8.18.2
       with:
         config-path: .github/gitleaks.toml
         # Use full GitHub repository path and explicit version
