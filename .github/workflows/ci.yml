@@ -74,11 +74,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Check for secrets
-      uses: gitleaks/gitleaks-action@v8
+      uses: zricethezav/gitleaks-action@v8
       with:
         config-path: .github/gitleaks.toml
-        # Add Version toensure availability
-        version: v8.18.2
+        # Use full GitHub repository path and explicit version
+        github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Dependency audit
       run: |
         pip install pip-audit
