@@ -51,7 +51,7 @@ jobs:
         DISPLAY: :99
         PYTHONPATH: ${{ github.workspace }}
       run: |
-        if [ "${{ runner.os }}" = "Linux" ]; then
+        if [ "${{ runner.os }}" == "Linux" ]; then
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           sleep 5
           touch $HOME/.Xauthority
@@ -76,6 +76,8 @@ jobs:
       uses: gitleaks/gitleaks-action@v8
       with:
         config-path: .github/gitleaks.toml
+        # Add Version toensure availability
+        version: v8.18.2
     - name: Dependency audit
       run: |
         pip install pip-audit
