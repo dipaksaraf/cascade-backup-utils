@@ -13,6 +13,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.8', '3.10', '3.12']
+        exclude:
+        - os: macos-latest
+        python-version: '3.8'  # PyObjC requires Python ≥3.9
       fail-fast: false
 
     steps:
@@ -48,7 +51,7 @@ jobs:
         DISPLAY: :99
         PYTHONPATH: ${{ github.workspace }}
       run: |
-        if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+        if [[ "${{ runner.os }}" == "Linux" ]]; then
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           sleep 5
           touch $HOME/.Xauthority
